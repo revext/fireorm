@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "outDir": "dist",
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "strict": true,
+    "target": "ES2018",
+    "esModuleInterop": true,
+    "strictNullChecks": false,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "types": [
+      "@types/node",
+      "@types/jest",	
+      "reflect-metadata"
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "~/*": [
+        "src/*", "test/*", "srcipts/*'"
+      ],
+      "@/*": [
+        "src/*", "test/*", "scripts/*"
+      ],
+    },
+  },
+  "include": ["src/**/*", "test/**/*", "scripts/**/*"],
+  "compileOnSave": true
+}
