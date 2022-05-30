@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "build": "rm ./revext-fireorm-1.0.0.tgz; rm -rf ./dist; tsc; npm pack",
     "testing": "ts-node -r tsconfig-paths/register tests/scripts/Testing.ts",
     "FIND ME OUT": "node -r ts-node/register/transpile-only -r tsconfig-paths/register dist/index.js",
-    "test": "jest --config ./jest.config.js"
+    "test": "jest --runInBand --config ./jest.config.js"
   },
   "main": "dist/src/index.js",
   "files": [

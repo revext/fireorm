@@ -2,12 +2,12 @@ import Model from "~/models/Model";
 import { ConstructorFunction } from "~/types/functions/ConstructorFunction";
 import Repository from "./Repository";
 import Commons from "../utilities/Commons"
-import { useEngine } from "..";
 import { GlobalThisOrm } from "~/types/internal/GlobalThisOrm";
 
 
 let gThis = (globalThis as GlobalThisOrm)
 gThis._repositoryMapping = new Map<string, Repository<any>>();
+
 
 export function registerRepository<K extends Repository<T>, T extends Model>(repositoryName: ConstructorFunction<K>) {
   const repository = new repositoryName(gThis._engine)
@@ -21,6 +21,9 @@ export function registerRepositories(repositories: ConstructorFunction<Repositor
 }
 
 export function getRepositoryFor<R extends Repository<Model>>(modelClass: ConstructorFunction<unknown>): R {
+  if(!modelClass) {
+    throw new Error(`'modelClass' is not defined on the property, also check if your property has a default value`)
+  }
   if(!gThis._repositoryMapping.has(modelClass.name)) {
       throw new Error(`No repository found for ${modelClass.name}`);
   }

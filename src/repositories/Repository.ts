@@ -1,11 +1,10 @@
 import EngineInterface from '~/engine/EngineInterface'
 import { Blueprint } from '~/models/Blueprint'
 import { QueryParam } from '~/types/queries/QueryParam'
-import { useEngine } from '../engine'
 import Model from '../models/Model'
 
 export default abstract class Repository<T extends Model> {
-  private engine: EngineInterface
+  engine: EngineInterface
   //TODO cache the entities into localstorage in browser
   //and into a file on server
   //TODO on clientside refresh the content when refresh from listeners
@@ -83,7 +82,7 @@ export default abstract class Repository<T extends Model> {
   
   async load (id: string, routeParams: any = {}, forceRefresh = false): Promise<T> {
     //if we have the model in cache, return it
-    if(!forceRefresh){
+    if(!forceRefresh){ 
       const cachedModel = this.findCachedModel(id)
       if(cachedModel){
         return cachedModel

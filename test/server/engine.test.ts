@@ -1,44 +1,19 @@
 import 'reflect-metadata'
 import admin from 'firebase-admin'
-import { Collection, startOrm, Field, HasCollection, Model } from "../../src"
-import { useEngine } from '../../src/engine'
-import { Blueprint } from '../../src/models/Blueprint'
+import { startOrm, useEngine, Blueprint } from "../../src"
 import ServerEngine from '../../src/engine/ServerEngine'
+import { Human } from '../data/models'
 
-class Bone extends Model {
-    @Field()
-    length: number = 0
-}
-
-@Collection({ route: 'humans/{humanId}/dogs'})	
-class Dog extends Model {
-    @Field()
-    name: string = ''
-
-    @Field({ routeParam: true })
-    humanId: string = "1"
-
-    @Field({ modelClass: Bone })
-    bones: Bone[] = []
-}
-
-@Collection({ route: 'humans'})	
-class Human extends Model {
-    @Field()
-    name: string = ''
-
-    @HasCollection({ modelClass: Dog })
-    dogs: Dog[] = []
-
-    @Field({ timestamp: true })
-    createdAt: Date = new Date()
-}
+admin.initializeApp({
+    credential: admin.credential.cert(require('../../service-account.json'))
+})
+startOrm(new ServerEngine(admin.app()))
 
 beforeAll(async () => {
-    admin.initializeApp({
-        credential: admin.credential.cert(require('../../service-account.json'))
+    const snapshot = await admin.firestore().collection('humans').get()
+    snapshot.forEach(async doc => {
+        await doc.ref.delete()
     })
-    startOrm(new ServerEngine(admin.app()))
 
     await admin.firestore().collection('humans').doc('1').set({
         name: 'John'
@@ -47,13 +22,6 @@ beforeAll(async () => {
         name: 'Jim'
     })
 });
-
-afterAll(async () => {
-    const snapshot = await admin.firestore().collection('humans').get()
-    snapshot.forEach(async doc => {
-        await doc.ref.delete()
-    })
-})
 
 test('save on engine, create and save model', async () => {
     const human = new Human()

@@ -1,61 +1,22 @@
 import 'reflect-metadata'
 import admin from 'firebase-admin'
-import { Collection, startOrm, Field, getRepositoryFor, HasMany, HasCollection, Model, registerRepositories, Repository } from "../../src"
-import serviceAccount from '../../service-account.json'
+import {  startOrm,  getRepositoryFor, registerRepositories } from "../../src"
+import { Human, Dog } from "../data/models"
 import ServerEngine from '../../src/engine/ServerEngine'
+import { DogRepository, HumanRepository } from '../data/repositories'
 
-class Bone extends Model {
-    @Field()
-    length: number = 0
-}
-
-@Collection({ route: 'humans/{humanId}/dogs'})	
-class Dog extends Model {
-    @Field()
-    name: string    
-
-    @Field({ routeParam: true })
-    humanId: string = "1"
-
-    @Field({ modelClass: Bone })
-    bones: Bone[]
-}
-
-@Collection({ route: 'humans'})	
-class Human extends Model {
-    @Field()
-    name: string    
-
-    @HasMany({ modelClass: Human, mapIds: (_: Human) => { return ['2'] } })
-    relatives: Human[]
-
-    @HasCollection({ modelClass: Dog })
-    dogs: Dog[]
-}
-
-class DogRepository extends Repository<Dog>{
-    getModel(): Dog {
-        return new Dog()
-    }
-}
-
-class HumanRepository extends Repository<Human>{
-    getModel(): Human {
-        return new Human()
-    }
-}
 
 let dogRepository: DogRepository = null
 let humanRepository: HumanRepository = null
 
-beforeAll(async () => {
-    admin.initializeApp({
-        credential: admin.credential.cert(require('../../service-account.json'))
-    })
-    startOrm(new ServerEngine(admin.app()))
-    
-    registerRepositories([DogRepository, HumanRepository])
+admin.initializeApp({
+    credential: admin.credential.cert(require('../../service-account.json'))
+})
+startOrm(new ServerEngine(admin.app()))
 
+registerRepositories([DogRepository, HumanRepository])
+
+beforeAll(async () => {
     dogRepository = getRepositoryFor(Dog) as DogRepository
     humanRepository = getRepositoryFor(Human) as HumanRepository
 

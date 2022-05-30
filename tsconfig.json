@@ -25,11 +25,11 @@
     "baseUrl": "./",
     "paths": {
       "~/*": [
-        "src/*", "test/*", "srcipts/*'"
+        "src/*", "test/*", "scripts/*'"
       ],
       "@/*": [
         "src/*", "test/*", "scripts/*"
-      ],
+      ]
     },
   },
   "include": ["src/**/*", "test/**/*", "scripts/**/*"],

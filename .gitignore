@@ -69,3 +69,4 @@ dist
 service-account.json
 firebase*
 firestore*
+.firebaserc

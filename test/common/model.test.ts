@@ -1,44 +1,8 @@
 import 'reflect-metadata'
-import { Collection, Field, Model } from "../../src"
-
-class Bone extends Model {
-    @Field()
-    length: number = 0
-
-    width: number = 0
-}
-
-@Collection({ route: '/humans/{humanId}/dogs'})	
-class Dog extends Model {
-    @Field()
-    name: string    
-
-    @Field({ routeParam: true })
-    humanId: string = "1"
-
-    @Field({ modelClass: Bone })
-    bones: Bone[]
-
-    type: string = 'terrier'
-
-    //TODO be able to convert map values as modelClasses
-    @Field({ modelClass: Map })
-    tagNames: Map<string, string> = new Map([['test1','test2']])
-}
-
-@Collection({ route: '/humans/{humanId}/cats'})	
-class Cat extends Model {
-    @Field()
-    name: string    
-
-    type: string = 'tiger'
-}
+import { Dog, Bone} from '../data/models'
 
 
 let dog = new Dog()
-let bone = new Bone()
-let cat = new Cat()
-
 beforeAll(async () => {
     dog.name = "Fido"
     dog.bones = [
@@ -67,7 +31,8 @@ test('test fromJson on model with submodels', () => {
     expect(dog.tagNames.get('hello')).toBe('world')
     expect(dog.bones[0].length).toBe(10)
     expect(dog.bones[1].length).toBe(20)
-    expect(dog.bones[0].width).toBe(0)
+    expect(dog.bones[0].width).toBeUndefined()
+    // expect().toBe(0)
 })
 
 test('test toJson on model with submodels', () => {
@@ -78,7 +43,9 @@ test('test toJson on model with submodels', () => {
     expect(dogJson.tagNames['hello']).toBe('world')
     expect(dogJson.bones[0].length).toBe(10)
     expect(dogJson.bones[1].length).toBe(20)
-    expect(dogJson.bones[0].width).toBe(0)
+    expect(dogJson.bones[0].width).toBeUndefined()
+    expect(Object.hasOwnProperty.call(dogJson.bones[0], 'width')).toBe(false)
+    expect(Object.hasOwnProperty.call(dogJson.bones[0], 'errors')).toBe(false)
 })
 
 // test('test getRouteParameterNames for model', () => {
