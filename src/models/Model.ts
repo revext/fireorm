@@ -161,7 +161,17 @@ export default abstract class Model {
       }
 
       if(relations.length > 0){
-        await anyThis[loadedProperty].load(relations.reverse().join('.'))
+        //reverse back the array 
+        relations.reverse()
+        if(anyThis[loadedProperty] instanceof Array){
+          const promises = []
+          for(const index in anyThis[loadedProperty]){
+            promises.push(anyThis[loadedProperty][index].load(relations.join('.')))
+          }
+          await Promise.all(promises)
+        } else {
+          await anyThis[loadedProperty].load(relations.join('.'))
+        }
       }
     }
 
@@ -226,25 +236,20 @@ export default abstract class Model {
       for(const propertyKey in this) {
         // if property has field metadata, then we must convert into json
         if(Reflect.hasMetadata(fieldMetadataKey, this, propertyKey)){
-          console.log(this.constructor.name, propertyKey)
           const options = (Reflect.getMetadata(fieldMetadataKey, this, propertyKey) ?? {}) as FieldConfig
           const jsonPropertyKey = options.name ?? propertyKey
           if(this[propertyKey] !== undefined){
             if(this[propertyKey] instanceof Model) {
-              // console.log(this.constructor.name, propertyKey, "is a model")
               // if the property is a model, then we must convert into json
               json[jsonPropertyKey] = (this[propertyKey] as unknown as Model).toJson()
             } else {
               //if property is an array or object then iterate over its properties, and convert into json recursively
               if(this[propertyKey] instanceof Array) {
-                // console.log(this.constructor.name, propertyKey, "is an array")
                 json[jsonPropertyKey] = this.convertToJson(this[propertyKey])
               } else if(this[propertyKey] instanceof Object) {
-                // console.log(this.constructor.name, propertyKey, "is an object")
                 json[jsonPropertyKey] = instanceToPlain(this[propertyKey], {enableCircularCheck: true})
                 // json[jsonPropertyKey] = this[propertyKey]
               } else {
-                // console.log(this.constructor.name, propertyKey, "is other")
                 //otherwise property is just a property, so we convert it based on its type or decorator
                 if(options.timestamp) {
                   json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
@@ -308,15 +313,17 @@ export default abstract class Model {
                 }
               }
             } else {
-              // if property is an array or object then iterate over its properties, and convert from json recursively
-              if(data[jsonPropertyKey] instanceof Object || data[jsonPropertyKey] instanceof Array) {
-                anyThis[propertyKey] = this.convertFromJson(data[jsonPropertyKey])
+              if(options.timestamp) {
+                anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
               } else {
-                //otherwise property is just a property, so we convert it based on its type or decorator
-                if(options.timestamp) {
-                  anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
+                if(data[jsonPropertyKey] instanceof Object || data[jsonPropertyKey] instanceof Array) {
+                   //if property is an array or object then iterate over its properties, and convert from json recursively
+                  
+                  anyThis[propertyKey] = this.convertFromJson(data[jsonPropertyKey])
                 } else {
+                  //otherwise property is just a property, so we convert it based on its type or decorator
                   anyThis[propertyKey] = data[jsonPropertyKey]
+                 
                 }
               }
             }

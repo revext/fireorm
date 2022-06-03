@@ -245,7 +245,7 @@ export default class ServerEngine implements EngineInterface {
   }
 
   convertToTimestamp(date: Date): admin.firestore.Timestamp{
-    return new admin.firestore.Timestamp(date.valueOf() / 1000, 0)
+    return admin.firestore.Timestamp.fromDate(date)
   }
 
   convertFromTimestamp(timestamp: admin.firestore.Timestamp){
