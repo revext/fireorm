@@ -226,19 +226,25 @@ export default abstract class Model {
       for(const propertyKey in this) {
         // if property has field metadata, then we must convert into json
         if(Reflect.hasMetadata(fieldMetadataKey, this, propertyKey)){
+          console.log(this.constructor.name, propertyKey)
           const options = (Reflect.getMetadata(fieldMetadataKey, this, propertyKey) ?? {}) as FieldConfig
           const jsonPropertyKey = options.name ?? propertyKey
           if(this[propertyKey] !== undefined){
             if(this[propertyKey] instanceof Model) {
+              // console.log(this.constructor.name, propertyKey, "is a model")
               // if the property is a model, then we must convert into json
               json[jsonPropertyKey] = (this[propertyKey] as unknown as Model).toJson()
             } else {
               //if property is an array or object then iterate over its properties, and convert into json recursively
               if(this[propertyKey] instanceof Array) {
+                // console.log(this.constructor.name, propertyKey, "is an array")
                 json[jsonPropertyKey] = this.convertToJson(this[propertyKey])
               } else if(this[propertyKey] instanceof Object) {
-                json[jsonPropertyKey] = instanceToPlain(this[propertyKey])
+                // console.log(this.constructor.name, propertyKey, "is an object")
+                json[jsonPropertyKey] = instanceToPlain(this[propertyKey], {enableCircularCheck: true})
+                // json[jsonPropertyKey] = this[propertyKey]
               } else {
+                // console.log(this.constructor.name, propertyKey, "is other")
                 //otherwise property is just a property, so we convert it based on its type or decorator
                 if(options.timestamp) {
                   json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
@@ -262,13 +268,15 @@ export default abstract class Model {
       
       Object.keys(root).forEach((key) => {
         if((root as any)[key] !== undefined)
-          if((root as any)[key] instanceof Model)
+          if((root as any)[key] instanceof Model) {
             json[key] = (root as any)[key].toJson() 
-          else
-            if((root as any)[key] instanceof Array || (root as any)[key] instanceof Object)
+          } else {
+            if((root as any)[key] instanceof Array || (root as any)[key] instanceof Object){
               json[key] = this.convertToJson((root as any)[key])
-            else
+            } else { 
               json[key] = (root as any)[key]
+            }
+          }
       })
 
       return json
@@ -289,14 +297,14 @@ export default abstract class Model {
                   if(options.modelClass.prototype instanceof Model){
                     anyThis[jsonPropertyKey].push((new options.modelClass()).fromJson(value))
                   } else {
-                    anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, value)
+                    anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, value, {enableCircularCheck: true})
                   }
                 })
               } else {
                 if(options.modelClass.prototype instanceof Model){
                   anyThis[jsonPropertyKey].push((new options.modelClass()).fromJson(data[jsonPropertyKey]))
                 } else {
-                  anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, data[jsonPropertyKey])
+                  anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, data[jsonPropertyKey], {enableCircularCheck: true})
                 }
               }
             } else {

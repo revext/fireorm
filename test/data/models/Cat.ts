@@ -1,4 +1,5 @@
-import { Collection, Model, Field } from "../../../src/index"
+import { Human } from "."
+import { Collection, Model, Field, HasOne } from "../../../src/index"
 
 @Collection({ route: '/humans/{humanId}/cats'})	
 export class Cat extends Model {
@@ -6,4 +7,10 @@ export class Cat extends Model {
     name: string    
 
     type: string = 'tiger'
+
+    @Field()
+    humanId: string = "1"
+
+    @HasOne({ modelClass: Human })
+    human: Human = null
 }

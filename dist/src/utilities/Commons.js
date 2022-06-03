@@ -1,0 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Commons {
+    static getConstructor(model) {
+        return Object.getPrototypeOf(model).constructor;
+    }
+}
+exports.default = Commons;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29tbW9ucy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlsaXRpZXMvQ29tbW9ucy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUdBLE1BQXFCLE9BQU87SUFDeEIsTUFBTSxDQUFDLGNBQWMsQ0FBa0IsS0FBUTtRQUMzQyxPQUFPLE1BQU0sQ0FBQyxjQUFjLENBQUMsS0FBSyxDQUFDLENBQUMsV0FBVyxDQUFBO0lBQ25ELENBQUM7Q0FDSjtBQUpELDBCQUlDIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IE1vZGVsIGZyb20gXCJ+L21vZGVscy9Nb2RlbFwiO1xyXG5cclxuXHJcbmV4cG9ydCBkZWZhdWx0IGNsYXNzIENvbW1vbnMge1xyXG4gICAgc3RhdGljIGdldENvbnN0cnVjdG9yPFQgZXh0ZW5kcyBNb2RlbD4obW9kZWw6IFQpOiB7bmV3KC4uLmFyZ3MgOiBhbnlbXSk6IFQgO317XHJcbiAgICAgICAgcmV0dXJuIE9iamVjdC5nZXRQcm90b3R5cGVPZihtb2RlbCkuY29uc3RydWN0b3JcclxuICAgIH1cclxufSJdfQ==

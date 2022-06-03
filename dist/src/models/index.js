@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.createModel = void 0;
+const __1 = require("..");
+function createModel(modelClass, params) {
+    const repository = (0, __1.getRepositoryFor)(modelClass);
+    const model = repository.getModel();
+    model.init(params);
+    return model;
+}
+exports.createModel = createModel;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvbW9kZWxzL2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7OztBQUFBLDBCQUFzQztBQUV0QyxTQUFnQixXQUFXLENBQUksVUFBdUMsRUFBRSxNQUFhO0lBQ2pGLE1BQU0sVUFBVSxHQUFHLElBQUEsb0JBQWdCLEVBQUMsVUFBVSxDQUFDLENBQUE7SUFFL0MsTUFBTSxLQUFLLEdBQUcsVUFBVSxDQUFDLFFBQVEsRUFBRSxDQUFBO0lBQ25DLEtBQUssQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUE7SUFFbEIsT0FBTyxLQUFxQixDQUFBO0FBQ2hDLENBQUM7QUFQRCxrQ0FPQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IGdldFJlcG9zaXRvcnlGb3IgfSBmcm9tIFwiLi5cIjtcclxuXHJcbmV4cG9ydCBmdW5jdGlvbiBjcmVhdGVNb2RlbDxUPihtb2RlbENsYXNzOiB7IG5ldyAoLi4uYXJnczogYW55W10pOiBUIH0sIHBhcmFtczogYW55W10pOiBUIHtcclxuICAgIGNvbnN0IHJlcG9zaXRvcnkgPSBnZXRSZXBvc2l0b3J5Rm9yKG1vZGVsQ2xhc3MpXHJcblxyXG4gICAgY29uc3QgbW9kZWwgPSByZXBvc2l0b3J5LmdldE1vZGVsKClcclxuICAgIG1vZGVsLmluaXQocGFyYW1zKVxyXG5cclxuICAgIHJldHVybiBtb2RlbCBhcyB1bmtub3duIGFzIFRcclxufSJdfQ==

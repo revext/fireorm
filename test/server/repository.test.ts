@@ -1,12 +1,13 @@
 import 'reflect-metadata'
 import admin from 'firebase-admin'
 import {  startOrm,  getRepositoryFor, registerRepositories } from "../../src"
-import { Human, Dog } from "../data/models"
+import { Human, Dog, Cat } from "../data/models"
 import ServerEngine from '../../src/engine/ServerEngine'
-import { DogRepository, HumanRepository } from '../data/repositories'
+import { DogRepository, HumanRepository, CatRepository } from '../data/repositories'
 
 
 let dogRepository: DogRepository = null
+let catRepository: CatRepository = null
 let humanRepository: HumanRepository = null
 
 admin.initializeApp({
@@ -14,11 +15,12 @@ admin.initializeApp({
 })
 startOrm(new ServerEngine(admin.app()))
 
-registerRepositories([DogRepository, HumanRepository])
+registerRepositories([DogRepository, HumanRepository, CatRepository])
 
 beforeAll(async () => {
     dogRepository = getRepositoryFor(Dog) as DogRepository
     humanRepository = getRepositoryFor(Human) as HumanRepository
+    catRepository = getRepositoryFor(Cat) as CatRepository
 
     await admin.firestore().collection('humans').doc('1').set({
         name: 'John'
@@ -33,13 +35,28 @@ beforeAll(async () => {
             { length: 20 },
         ]
     })
+    await admin.firestore().collection('humans/1/cats').doc('1').set({
+        name: 'Leprechaun'
+    })
 });
 
 afterAll(async () => {
+    await admin.firestore().collection('humans/1/cats').doc('1').delete()
     await admin.firestore().collection('humans/1/dogs').doc('1').delete()
     await admin.firestore().collection('humans').doc('1').delete()
     await admin.firestore().collection('humans').doc('2').delete()
 });
+
+test('loadMany on model by repository', async () => {
+    const cat = await catRepository.load("1", { humanId: "1"})
+    console.log(cat)
+    await cat.loadMany(['human', 'human.dogs'])
+
+    expect(cat.name).toBe("Leprechaun")
+    expect(cat.human.name).toBe("John")
+    expect(cat.human.dogs[0].id).toBe("1")
+    expect(cat.human.dogs[0].name).toBe("Fido")
+})
 
 test('load by id on repository', async () => {
     const human = await humanRepository.load("1")

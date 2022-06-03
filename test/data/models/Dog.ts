@@ -10,7 +10,7 @@ export class Dog extends Model {
     humanId: string = "1"
 
     @Field({ modelClass: Bone })
-bones: Bone[]
+    bones: Bone[]
 
     type: string = 'terrier'
 

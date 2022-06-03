@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Dog, Bone} from '../data/models'
+import { Dog, Bone } from '../data/models'
 
 
 let dog = new Dog()
@@ -11,6 +11,7 @@ beforeAll(async () => {
     ]
 
     dog.bones[0].length = 10
+    dog.bones[0].dog = dog
     dog.bones[1].length = 20
 });
 
@@ -42,11 +43,15 @@ test('test toJson on model with submodels', () => {
     expect(dogJson.type).toBeUndefined()
     expect(dogJson.tagNames['hello']).toBe('world')
     expect(dogJson.bones[0].length).toBe(10)
+    expect(dogJson.bones[0].dog).toBeUndefined()
     expect(dogJson.bones[1].length).toBe(20)
     expect(dogJson.bones[0].width).toBeUndefined()
     expect(Object.hasOwnProperty.call(dogJson.bones[0], 'width')).toBe(false)
     expect(Object.hasOwnProperty.call(dogJson.bones[0], 'errors')).toBe(false)
+    expect(Object.hasOwnProperty.call(dogJson.bones[0], 'dog')).toBe(false)
 })
+
+//FIXME multi depth relationship
 
 // test('test getRouteParameterNames for model', () => {
 //     expect(dog.getRouteParameterNames()).toEqual(['humanId'])
