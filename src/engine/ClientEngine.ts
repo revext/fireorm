@@ -251,11 +251,15 @@ export default class ClientEngine implements EngineInterface {
   }
 
   convertToTimestamp(date: Date): Timestamp{
-    return new Timestamp(date.valueOf() / 1000, 0)
+    return Timestamp.fromDate(date)
   }
 
   convertFromTimestamp(timestamp: Timestamp){
-    return timestamp.toDate()
+    if(typeof timestamp.toDate === 'function'){
+      return timestamp.toDate()
+    } else {
+      return new Date(timestamp.seconds * 1000)
+    }
   }
 
 
