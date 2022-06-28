@@ -195,22 +195,7 @@ export default abstract class Model {
           throw new Error(`Class ${this.constructor.name} doesn't have a route parameter on the @Collection annotation`)
         }
 
-        const pathTemplate = options.route
-        const params = searchRegex.exec(pathTemplate)
-
-        const returnParams: string[] = []
-        //if has route param
-        if(params){
-          //check to see if route param is a property of the model and it is set
-          params.forEach((param) => {
-            const paramStrip = param.replace(/[{}]/g, '')
-            if(!(this as any)[paramStrip]){
-              throw new Error(`Required route param ${paramStrip} is not set on the class ${this.constructor.name}`)
-            }
-            if(!returnParams.includes(paramStrip)) returnParams.push(paramStrip)
-          })
-        }
-
+        //TODO have a look at the workings of this getROuteParameter because there are some strange things involved
         //get every param which has been annotated in the model with 'routeParam: true'
         const paramsObject: ParamsObject = {}
         for(const propertyKey in this) {
@@ -222,6 +207,23 @@ export default abstract class Model {
             }
           }
         }
+
+        // const pathTemplate = options.route
+        // const params = searchRegex.exec(pathTemplate)
+
+        // // const returnParams: string[] = []
+        // //if has route param
+        // if(params){
+        //   //check to see if route param is a property of the model and it is set
+        //   params.forEach((param) => {
+        //     const paramStrip = param.replace(/[{}]/g, '')
+        //     if(!paramsObject[paramStrip]){
+        //       throw new Error(`Required route param ${paramStrip} is not set on the class ${this.constructor.name}`)
+        //     }
+        //     // if(!returnParams.includes(paramStrip)) returnParams.push(paramStrip)
+        //   })
+        // }
+
         return paramsObject
 
       } else {

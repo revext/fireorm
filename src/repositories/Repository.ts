@@ -175,7 +175,8 @@ export default abstract class Repository<T extends Model> {
 
 
   private getModelsBlueprint(routeParams: any = {}): Blueprint<T> {
-    return this.getModel().fromJson(routeParams).getBlueprint()
+    const model = this.getModel().fromJson(routeParams)
+    return model.getBlueprint()
   }
 
   async loadCollection(routeParams: any = {}, forceRefresh = true){
