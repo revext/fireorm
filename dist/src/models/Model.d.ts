@@ -9,6 +9,7 @@ export default abstract class Model {
     constructor(...params: any[]);
     init(_: any[]): void;
     private errors;
+    abstract getModelName(): string;
     private collectRules;
     validate(): Promise<void>;
     hasErrors(): boolean;
