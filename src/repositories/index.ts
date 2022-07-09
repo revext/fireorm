@@ -11,7 +11,7 @@ gThis._repositoryMapping = new Map<string, Repository<any>>();
 
 export function registerRepository<K extends Repository<T>, T extends Model>(repositoryName: ConstructorFunction<K>) {
   const repository = new repositoryName(gThis._engine)
-  gThis._repositoryMapping.set(Commons.getConstructor(repository.getModel()).name, repository)
+  gThis._repositoryMapping.set(repository.getModel().getModelName(), repository)
 }
 
 export function registerRepositories(repositories: ConstructorFunction<Repository<Model>>[]) {
@@ -24,9 +24,10 @@ export function getRepositoryFor<R extends Repository<Model>>(modelClass: Constr
   if(!modelClass) {
     throw new Error(`'modelClass' is not defined on the property, also check if your property has a default value`)
   }
-  if(!gThis._repositoryMapping.has(modelClass.name)) {
-      throw new Error(`No repository found for ${modelClass.name}`);
+  const modelName = (new modelClass() as Model).getModelName()
+  if(!gThis._repositoryMapping.has(modelName)) {
+      throw new Error(`No repository found for ${modelName}`);
   }
-  const repository = gThis._repositoryMapping.get(modelClass.name) as R
+  const repository = gThis._repositoryMapping.get(modelName) as R
   return repository
 }

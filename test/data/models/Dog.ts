@@ -3,6 +3,9 @@ import { Bone } from '.'
 
 @Collection({ route: '/humans/{humanId}/dogs'})	
 export class Dog extends Model {
+    getModelName(): string {
+        return 'Dog'
+    }
     @Field()
     name: string    
 

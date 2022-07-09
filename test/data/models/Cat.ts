@@ -3,6 +3,9 @@ import { Collection, Model, Field, HasOne } from "../../../src/index"
 
 @Collection({ route: '/humans/{humanId}/cats'})	
 export class Cat extends Model {
+    getModelName(): string {
+        return 'Cat'
+    }
     @Field()
     name: string    
 

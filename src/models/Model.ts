@@ -15,6 +15,7 @@ import { instanceToPlain, plainToInstance } from "class-transformer";
 
 export type ParamsObject = { [key: string]: any };
 
+//TODO events before delete, after delet, before load, before-after save, update etc...
 
 export default abstract class Model {
     @Field()
@@ -29,6 +30,8 @@ export default abstract class Model {
     init(_: any[]): void { return }
 
     private errors: Errors = null
+
+    abstract getModelName(): string
 
     private collectRules<T>(): Validator.Rules {
       
@@ -318,10 +321,12 @@ export default abstract class Model {
               if(options.timestamp) {
                 anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
               } else {
-                if(data[jsonPropertyKey] instanceof Object || data[jsonPropertyKey] instanceof Array) {
-                   //if property is an array or object then iterate over its properties, and convert from json recursively
-                  
+                //if property is an array or object then iterate over its properties, and convert from json recursively
+                if(data[jsonPropertyKey] instanceof Array){
                   anyThis[propertyKey] = this.convertFromJson(data[jsonPropertyKey])
+                } else if(data[jsonPropertyKey] instanceof Object) {
+                  //if property is object then we assign the data to the default property value, user might need it
+                  anyThis[propertyKey] = this.convertFromJson(Object.assign(anyThis[propertyKey], data[jsonPropertyKey]))
                 } else {
                   //otherwise property is just a property, so we convert it based on its type or decorator
                   anyThis[propertyKey] = data[jsonPropertyKey]

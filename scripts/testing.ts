@@ -34,7 +34,7 @@ class HumanRepository extends Repository<Human>{
 
 registerRepositories([HumanRepository])
 
-const repo = getRepositoryFor(Human) as HumanRepository
+const repo = getRepositoryFor<HumanRepository>(Human) 
 console.log(repo)
 
 useEngine().runTransaction(async () => {

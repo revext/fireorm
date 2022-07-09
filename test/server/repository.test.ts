@@ -18,9 +18,9 @@ startOrm(new ServerEngine(admin.app()))
 registerRepositories([DogRepository, HumanRepository, CatRepository])
 
 beforeAll(async () => {
-    dogRepository = getRepositoryFor(Dog) as DogRepository
-    humanRepository = getRepositoryFor(Human) as HumanRepository
-    catRepository = getRepositoryFor(Cat) as CatRepository
+    dogRepository = getRepositoryFor(Dog)
+    humanRepository = getRepositoryFor(Human)
+    catRepository = getRepositoryFor(Cat)
 
     await admin.firestore().collection('humans').doc('1').set({
         name: 'John'
