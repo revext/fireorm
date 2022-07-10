@@ -1,3 +1,4 @@
-import { ConstructorFunction } from "~/types/functions/ConstructorFunction";
 import { Model } from "..";
-export declare function createModel<T extends Model>(modelClass: ConstructorFunction<T>, params?: any[]): T;
+export declare function createModel<T extends Model>(modelClass: {
+    new (...args: any[]): T;
+}, params?: any[]): T;
