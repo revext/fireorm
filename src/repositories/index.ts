@@ -1,7 +1,6 @@
 import Model from "~/models/Model";
 import { ConstructorFunction } from "~/types/functions/ConstructorFunction";
 import Repository from "./Repository";
-import Commons from "../utilities/Commons"
 import { GlobalThisOrm } from "~/types/internal/GlobalThisOrm";
 
 

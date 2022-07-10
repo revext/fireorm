@@ -23,11 +23,9 @@ export default abstract class Model {
 
     relationsLoaded: string[] = []
 
-    constructor(...params: any[]) {
-      this.init(params)
-    }
+    constructor(..._: any[]) {}
 
-    init(_: any[]): void { return }
+    init(..._: any[]): void { return }
 
     private errors: Errors = null
 

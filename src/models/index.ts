@@ -1,10 +1,9 @@
-import { getRepositoryFor, Model } from "..";
+import { ConstructorFunction } from "~/types/functions/ConstructorFunction";
+import { Model } from "..";
 
-export function createModel<T extends Model>(modelClass: { new (...args: any[]): T }, params: any[]): T {
-    const repository = getRepositoryFor(modelClass)
-
-    const model = repository.getModel()
-    model.init(params)
+export function createModel<T extends Model>(modelClass: ConstructorFunction<T>, params: any[] = []): T {    
+    const model = new modelClass()
+    model.init(...params)
 
     return model as unknown as T
 }

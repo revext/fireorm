@@ -6,8 +6,8 @@ export declare type ParamsObject = {
 export default abstract class Model {
     id?: string;
     relationsLoaded: string[];
-    constructor(...params: any[]);
-    init(_: any[]): void;
+    constructor(..._: any[]);
+    init(..._: any[]): void;
     private errors;
     abstract getModelName(): string;
     private collectRules;
