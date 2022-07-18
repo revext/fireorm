@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import { Dog, Bone } from '../data/models'
 
 

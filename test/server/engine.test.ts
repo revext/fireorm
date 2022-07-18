@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import admin from 'firebase-admin'
 import { startOrm, useEngine, Blueprint } from "../../src"
 import ServerEngine from '../../src/engine/ServerEngine'

@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import admin from 'firebase-admin'
 import {  startOrm,  getRepositoryFor, registerRepositories } from "../../src"
 import { Human, Dog, Cat } from "../data/models"

@@ -1,9 +1,15 @@
-import Model from "~/models/Model";
+
 import { FieldConfig } from "~/types/configs/FieldConfig";
 import { PropertyDecoratorFunction } from "~/types/functions/PropertyDecoratorFunction";
-import { fieldMetadataKey } from "./MetadataKeys";
+import { ClassWithFields } from "~/types/internal/ClassWithFields";
 
-
-export function Field<T extends Model>(options: FieldConfig = null): PropertyDecoratorFunction {
-  return Reflect.metadata(fieldMetadataKey, options);
+export function Field(options: FieldConfig = null): PropertyDecoratorFunction {
+  return  (target: Object, propertyKey: string | symbol): void => {
+    if(!target.hasOwnProperty('fields')){
+      let fields: any = {}
+      fields[propertyKey] = options ?? {}
+      Object.defineProperty(target, 'fields', { value: fields })
+    } else 
+      (target as ClassWithFields).fields[propertyKey] = options ?? {}
+  };
 }

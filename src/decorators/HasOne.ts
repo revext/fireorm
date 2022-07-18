@@ -1,10 +1,16 @@
 import Model from "~/models/Model";
 import { PropertyDecoratorFunction } from "~/types/functions/PropertyDecoratorFunction";
-import { RelationConfigWithType, HasOneRelationConfig } from "~/types/configs/RelationConfig";
-import { relationMetadataKey } from "./MetadataKeys";
+import { HasOneRelationConfig } from "~/types/configs/RelationConfig";
+import { ClassWithRelations, Relations } from "~/types/internal/ClassWithRelations";
 
 
 export function HasOne<K extends Model>(options: HasOneRelationConfig): PropertyDecoratorFunction {
-  options = Object.assign(options, { type: 'hasOne' }) as RelationConfigWithType;
-  return Reflect.metadata(relationMetadataKey, options);
+  return  (target: Object, propertyKey: string | symbol): void => {
+    if(!target.hasOwnProperty('relations')){
+      let relations: any = {}
+      relations[propertyKey] = Object.assign(options, { type: 'hasOne' })
+      Object.defineProperty(target, 'relations', { value: relations })
+    } else 
+      (target as ClassWithRelations).relations[propertyKey] = Object.assign(options, { type: 'hasOne' as Relations })
+  };
 }

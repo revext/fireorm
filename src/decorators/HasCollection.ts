@@ -1,8 +1,14 @@
 import { PropertyDecoratorFunction } from "~/types/functions/PropertyDecoratorFunction";
-import { RelationConfig, RelationConfigWithType } from "~/types/configs/RelationConfig";
-import { relationMetadataKey } from "./MetadataKeys";
+import { RelationConfig } from "~/types/configs/RelationConfig";
+import { ClassWithRelations, Relations } from "~/types/internal/ClassWithRelations";
 
 export function HasCollection(options: RelationConfig): PropertyDecoratorFunction {
-  options = Object.assign(options, { type: 'hasCollection' }) as RelationConfigWithType;
-  return Reflect.metadata(relationMetadataKey, options);
+  return  (target: Object, propertyKey: string | symbol): void => {
+    if(!target.hasOwnProperty('relations')){
+      let relations: any = {}
+      relations[propertyKey] = Object.assign(options, { type: 'hasCollection' })
+      Object.defineProperty(target, 'relations', { value: relations })
+    } else 
+      (target as ClassWithRelations).relations[propertyKey] = Object.assign(options, { type: 'hasCollection' as Relations })
+  };
 }

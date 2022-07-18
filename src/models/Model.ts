@@ -1,16 +1,19 @@
 
 import Validator, { Errors } from "validatorjs"
 import Repository from "~/repositories/Repository";
-import { collectionMetadataKey, fieldMetadataKey, relationMetadataKey, validateMetadataKey } from "../decorators/MetadataKeys";
 import { useEngine } from "../engine";
 import { getRepositoryFor } from "../repositories";
-import { HasManyRelationConfig, RelationConfigWithType } from "../types/configs/RelationConfig";
+import { HasManyRelationConfig, HasOneRelationConfig, RelationConfigWithType } from "../types/configs/RelationConfig";
 import { ConstructorFunction } from "../types/functions/ConstructorFunction";
 import { FieldConfig } from "../types/configs/FieldConfig";
 import { ValidateConfig } from "../types/configs/ValidateConfig";
 import { Blueprint } from "./Blueprint";
 import { Field } from "..";
 import { instanceToPlain, plainToInstance } from "class-transformer";
+import { ClassWithFields } from "~/types/internal/ClassWithFields";
+import { ClassWithCollection } from "~/types/internal/ClassWithCollection";
+import { ClassWithRelations } from "~/types/internal/ClassWithRelations";
+import { ClassWithRules } from "~/types/internal/ClassWithRules";
 
 
 export type ParamsObject = { [key: string]: any };
@@ -33,14 +36,18 @@ export default abstract class Model {
 
     private collectRules<T>(): Validator.Rules {
       
+      const prototype = (Object.getPrototypeOf(this) as ClassWithRules<T>)
+      const ruleData = prototype.rules ?? {}
+      const ruleKeys = Object.keys(ruleData)
+
       let rules: Validator.Rules = {}
       for(const propertyKey in this){
         //TODO recursive validation on related models
-        if(Reflect.hasMetadata(validateMetadataKey, this, propertyKey)){
-          const rule = Reflect.getMetadata(validateMetadataKey, this, propertyKey) ?? {} as ValidateConfig<T>
+        if(ruleKeys.includes(propertyKey)){
+          const rule = ruleData[propertyKey] as ValidateConfig<T>
 
           if(rule instanceof Function){
-            rules = Object.assign(rules, rule(this))
+            rules = Object.assign(rules, rule(this as unknown as T))
           } else if(rule instanceof Object){
             rules = Object.assign(rules, rule)
           } else {
@@ -104,12 +111,16 @@ export default abstract class Model {
       relationName = relations.reverse().pop()
 
       let loadedProperty = relationName
+
+      const prototype = (Object.getPrototypeOf(this) as ClassWithRelations)
+      const relationData = prototype.relations ?? {}
+      const relationKeys = Object.keys(relationData)
       
       if(!this.relationsLoaded.includes(relationName)){
         const routeParams = this.getRouteParameterMapping()
         for(const propertyKey in this) {
-          if(Reflect.hasMetadata(relationMetadataKey, this, propertyKey)){
-            const options = Reflect.getMetadata(relationMetadataKey, this, propertyKey) ?? {} as RelationConfigWithType
+          if(relationKeys.includes(propertyKey)){
+            const options = relationData[propertyKey]
             //get the repository for the current modelClass
             const repository = getRepositoryFor(options.modelClass as ConstructorFunction<Model>) as Repository<Model>
             if((options.name && options.name === relationName) || propertyKey === relationName) {
@@ -128,7 +139,7 @@ export default abstract class Model {
                     }
                   }
                 } else {
-                  throw new Error(`Relation ${relationName} with '${options.type}' on ${options.relatedId} property is not an array`)
+                  throw new Error(`Relation ${relationName} with '${options.type}' on ${propertyKey} property is not an array`)
                 }
               } else if(options.type === 'hasCollection') {
                 //TODO an option where the related data can be 'paginated'
@@ -144,10 +155,11 @@ export default abstract class Model {
                   throw new Error(`Relation ${relationName} with '${options.type}' on ${propertyKey} property is not an array`)
                 }
               } else {
+                const hasOneOptions = options as HasOneRelationConfig
                 //load data into the 'propertyKey' property of the model, while load the model with the id from the 'relatedId' property
-                anyThis[propertyKey] = await repository.load((this as any)[options.relatedId], routeParams)
-                if(options.foreignProperty){
-                  anyThis[propertyKey][options.foreignProperty] = this
+                anyThis[propertyKey] = await repository.load((this as any)[hasOneOptions.relatedId], routeParams)
+                if(hasOneOptions.foreignProperty){
+                  anyThis[propertyKey][hasOneOptions.foreignProperty] = this
                 }
               }
             }
@@ -181,7 +193,8 @@ export default abstract class Model {
     }
 
     getRoute(): string {
-      const options = Reflect.getMetadata(collectionMetadataKey, this.constructor) ?? {}
+      const prototype = (Object.getPrototypeOf(this) as ClassWithCollection)
+      const options = prototype.collection
       if(!options || !options.route){
         throw new Error(`Class ${this.constructor.name} doesn't have a route parameter on the @Collection annotation`)
       }
@@ -190,8 +203,11 @@ export default abstract class Model {
 
     getRouteParameterMapping(): ParamsObject {
       const searchRegex = /{([^}]+)}/g
-      if(Reflect.hasMetadata(collectionMetadataKey, this.constructor)) {
-        const options = Reflect.getMetadata(collectionMetadataKey, this.constructor) ?? {}
+      const prototype = (Object.getPrototypeOf(this) as ClassWithFields & ClassWithCollection)
+      const fieldData = prototype.fields ?? {}
+      const fieldKeys = Object.keys(fieldData)
+      if(prototype.collection) {
+        const options = prototype.collection
         if(!options || !options.route){
           throw new Error(`Class ${this.constructor.name} doesn't have a route parameter on the @Collection annotation`)
         }
@@ -199,9 +215,10 @@ export default abstract class Model {
         //TODO have a look at the workings of this getROuteParameter because there are some strange things involved
         //get every param which has been annotated in the model with 'routeParam: true'
         const paramsObject: ParamsObject = {}
+        
         for(const propertyKey in this) {
-          if(Reflect.hasMetadata(fieldMetadataKey, this, propertyKey)){
-            const options = Reflect.getMetadata(fieldMetadataKey, this, propertyKey) ?? {} as FieldConfig
+          if(fieldKeys.includes(propertyKey)){
+            const options = fieldData[propertyKey]
 
             if(options.routeParam){
               paramsObject[options.name ?? propertyKey] = this[propertyKey]
@@ -236,10 +253,13 @@ export default abstract class Model {
     toJson(): any {
       const json: any = {}
 
+      const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
+      const fieldKeys = Object.keys(fieldData)
+
       for(const propertyKey in this) {
         // if property has field metadata, then we must convert into json
-        if(Reflect.hasMetadata(fieldMetadataKey, this, propertyKey)){
-          const options = (Reflect.getMetadata(fieldMetadataKey, this, propertyKey) ?? {}) as FieldConfig
+        if(fieldKeys.includes(propertyKey)){
+          const options = fieldData[propertyKey] as FieldConfig
           const jsonPropertyKey = options.name ?? propertyKey
           if(this[propertyKey] !== undefined){
             if(this[propertyKey] instanceof Model) {
@@ -292,10 +312,14 @@ export default abstract class Model {
 
     fromJson(data: any): this {
       let anyThis = this as any
+
+      const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
+      const fieldKeys = Object.keys(fieldData)
+
       for(const propertyKey in data) {
         //if property exists in data and property has field metadata, then we must convert from json
-        if(Reflect.hasMetadata(fieldMetadataKey, this, propertyKey)){
-          const options = Reflect.getMetadata(fieldMetadataKey, this, propertyKey) ?? {} as FieldConfig
+        if(fieldKeys.includes(propertyKey)){
+          const options = fieldData[propertyKey] as FieldConfig
           const jsonPropertyKey = options.name ?? propertyKey
           if(data[jsonPropertyKey]){
             if(options?.modelClass) {
@@ -303,14 +327,14 @@ export default abstract class Model {
                 anyThis[jsonPropertyKey] = new Array()
                 data[jsonPropertyKey].forEach((value: any) => {
                   if(options.modelClass.prototype instanceof Model){
-                    anyThis[jsonPropertyKey].push((new options.modelClass()).fromJson(value))
+                    anyThis[jsonPropertyKey].push(((new options.modelClass()) as Model).fromJson(value))
                   } else {
                     anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, value, {enableCircularCheck: true})
                   }
                 })
               } else {
                 if(options.modelClass.prototype instanceof Model){
-                  anyThis[jsonPropertyKey].push((new options.modelClass()).fromJson(data[jsonPropertyKey]))
+                  anyThis[jsonPropertyKey].push(((new options.modelClass()) as Model).fromJson(data[jsonPropertyKey]))
                 } else {
                   anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, data[jsonPropertyKey], {enableCircularCheck: true})
                 }

@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 // import EmployeeRepository from "../repositories/EmployeeRepository";
 // import { DateTime } from 'luxon';
 import admin from 'firebase-admin'
@@ -22,6 +21,9 @@ startOrm(new ServerEngine(admin.app()))
 
 @Collection({ route: 'humans'})	
 class Human extends Model {
+    getModelName(): string {
+        return 'Human'
+    }
     @Field()
     name: string    
 }
