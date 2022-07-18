@@ -6,7 +6,7 @@ import { ClassWithRules } from "~/types/internal/ClassWithRules";
 
 export function Validate<T extends Model>(rule: ValidateConfig<T>): PropertyDecoratorFunction {
   return  (target: Object, propertyKey: string | symbol): void => {
-    if(!target.hasOwnProperty('fields')){
+    if(!target.hasOwnProperty('rules')){
       let rules: any = {}
       rules[propertyKey] = rule
       Object.defineProperty(target, 'rules', { value: rules })
