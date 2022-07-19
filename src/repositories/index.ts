@@ -5,10 +5,11 @@ import { GlobalThisOrm } from "~/types/internal/GlobalThisOrm";
 
 
 let gThis = (globalThis as GlobalThisOrm)
-gThis._repositoryMapping = new Map<string, Repository<any>>();
-
 
 export function registerRepository<K extends Repository<T>, T extends Model>(repositoryName: ConstructorFunction<K>) {
+  if(!gThis._repositoryMapping){
+    gThis._repositoryMapping = new Map<string, Repository<any>>();
+  }
   const repository = new repositoryName(gThis._engine)
   gThis._repositoryMapping.set(repository.getModel().getModelName(), repository)
 }

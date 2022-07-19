@@ -4,6 +4,7 @@ import { HasOneRelationConfig } from "~/types/configs/RelationConfig";
 import { ClassWithRelations, Relations } from "~/types/internal/ClassWithRelations";
 
 
+// TODO instead of class pass the getModelName for the options modelClass
 export function HasOne<K extends Model>(options: HasOneRelationConfig): PropertyDecoratorFunction {
   return  (target: Object, propertyKey: string | symbol): void => {
     if(!target.hasOwnProperty('relations')){
