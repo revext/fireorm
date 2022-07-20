@@ -131,7 +131,7 @@ export default abstract class Model {
                 if(!hasManyOptions.mapIds && !hasManyOptions.relatedIds){
                   throw new Error(`@HasMany relation ${relationName} on ${this.constructor.name} is missing 'mapIds' and 'relatedIds'. One of them must be defined.`)
                 }
-                if(anyThis[propertyKey] instanceof Array || anyThis[propertyKey] === undefined || anyThis[propertyKey] === null) {
+                if(Array.isArray(anyThis[propertyKey]) || anyThis[propertyKey] === undefined || anyThis[propertyKey] === null) {
                   anyThis[propertyKey] = await repository.loadMany((hasManyOptions.mapIds ? hasManyOptions.mapIds(this) : anyThis[hasManyOptions.relatedIds]), routeParams)
                   if(options.foreignProperty){
                     for(const index in anyThis[propertyKey]){
@@ -144,7 +144,7 @@ export default abstract class Model {
               } else if(options.type === 'hasCollection') {
                 //TODO an option where the related data can be 'paginated'
                 //check if property is array, then load the subcollection into it
-                if(anyThis[propertyKey] instanceof Array || anyThis[propertyKey] === undefined || anyThis[propertyKey] === null) {
+                if(Array.isArray(anyThis[propertyKey]) || anyThis[propertyKey] === undefined || anyThis[propertyKey] === null) {
                   anyThis[propertyKey] = await repository.loadCollection(routeParams)
                   if(options.foreignProperty){
                     for(const index in anyThis[propertyKey]){
@@ -176,7 +176,7 @@ export default abstract class Model {
       if(relations.length > 0){
         //reverse back the array 
         relations.reverse()
-        if(anyThis[loadedProperty] instanceof Array){
+        if(Array.isArray(anyThis[loadedProperty])){
           const promises = []
           for(const index in anyThis[loadedProperty]){
             promises.push(anyThis[loadedProperty][index].load(relations.join('.')))
@@ -267,7 +267,7 @@ export default abstract class Model {
               json[jsonPropertyKey] = (this[propertyKey] as unknown as Model).toJson()
             } else {
               //if property is an array or object then iterate over its properties, and convert into json recursively
-              if(this[propertyKey] instanceof Array) {
+              if(Array.isArray(this[propertyKey])) {
                 json[jsonPropertyKey] = this.convertToJson(this[propertyKey])
               } else if(this[propertyKey] instanceof Object) {
                 json[jsonPropertyKey] = instanceToPlain(this[propertyKey], {enableCircularCheck: true})
@@ -292,14 +292,14 @@ export default abstract class Model {
     }
 
     private convertToJson(root: Array<any>|Object): any {
-      const json: any = root instanceof Array ? [] : {}
+      const json: any = Array.isArray(root) ? [] : {}
       
       Object.keys(root).forEach((key) => {
         if((root as any)[key] !== undefined)
           if((root as any)[key] instanceof Model) {
             json[key] = (root as any)[key].toJson() 
           } else {
-            if((root as any)[key] instanceof Array || (root as any)[key] instanceof Object){
+            if(Array.isArray((root as any)[key]) || (root as any)[key] instanceof Object){
               json[key] = this.convertToJson((root as any)[key])
             } else { 
               json[key] = (root as any)[key]
@@ -323,7 +323,7 @@ export default abstract class Model {
           const jsonPropertyKey = options.name ?? propertyKey
           if(data[jsonPropertyKey]){
             if(options?.modelClass) {
-              if(data[jsonPropertyKey] instanceof Array){
+              if(Array.isArray(data[jsonPropertyKey])){
                 anyThis[jsonPropertyKey] = new Array()
                 data[jsonPropertyKey].forEach((value: any) => {
                   if(options.modelClass.prototype instanceof Model){
@@ -344,7 +344,7 @@ export default abstract class Model {
                 anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
               } else {
                 //if property is an array or object then iterate over its properties, and convert from json recursively
-                if(data[jsonPropertyKey] instanceof Array){
+                if(Array.isArray(data[jsonPropertyKey])){
                   anyThis[propertyKey] = this.convertFromJson(data[jsonPropertyKey])
                 } else if(data[jsonPropertyKey] instanceof Object) {
                   //if property is object then we assign the data to the default property value, user might need it
@@ -364,10 +364,10 @@ export default abstract class Model {
     }
 
     private convertFromJson(root: Array<any>|Object): any{
-      const json: any = root instanceof Array ? [] : {}
+      const json: any = Array.isArray(root) ? [] : {}
       
       Object.keys(root).forEach((key) => {
-        if((root as any)[key] instanceof Array || (root as any)[key] instanceof Object)
+        if(Array.isArray((root as any)[key]) || (root as any)[key] instanceof Object)
           (json as any)[key] = this.convertFromJson((root as any)[key])
         else
           (json as any)[key] = (root as any)[key]
