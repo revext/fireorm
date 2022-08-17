@@ -95,15 +95,15 @@ export default abstract class Model {
       return this.errors?.first(name)
     }
 
-    async loadMany(relationNames: string[]): Promise<void>{
+    async loadMany(relationNames: string[], forceReload: boolean = true): Promise<void>{
       const promises = []
       for(const relation in relationNames){
-        promises.push(this.load(relationNames[relation]))
+        promises.push(this.load(relationNames[relation], forceReload))
       }
       await Promise.all(promises)
     }
 
-    async load(relationName: string): Promise<void> {
+    async load(relationName: string, forceReload: boolean = true): Promise<void> {
       let found = false
       const anyThis = this as any
 
@@ -116,7 +116,7 @@ export default abstract class Model {
       const relationData = prototype.relations ?? {}
       const relationKeys = Object.keys(relationData)
       
-      if(!this.relationsLoaded.includes(relationName)){
+      if(!this.relationsLoaded.includes(relationName) || forceReload){
         const routeParams = this.getRouteParameterMapping()
         for(const propertyKey in this) {
           if(relationKeys.includes(propertyKey)){

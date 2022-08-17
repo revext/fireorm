@@ -16,8 +16,8 @@ export default abstract class Model {
     getAllErrors(): Validator.ValidationErrors;
     getErrors(name: string): Array<string> | false;
     getError(name: string): string | false;
-    loadMany(relationNames: string[]): Promise<void>;
-    load(relationName: string): Promise<void>;
+    loadMany(relationNames: string[], forceReload?: boolean): Promise<void>;
+    load(relationName: string, forceReload?: boolean): Promise<void>;
     getBlueprint<T extends Model>(this: T): Blueprint<T>;
     getRoute(): string;
     getRouteParameterMapping(): ParamsObject;
