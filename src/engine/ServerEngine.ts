@@ -42,13 +42,13 @@ export default class ServerEngine implements EngineInterface {
         } else {
           if(this.transaction){
             const docRef = this.db.collection(blueprint.buildCollectionRoute()).doc()
-            this.transaction.set(docRef, model.toJson())
             model.id = docRef.id
+            this.transaction.set(docRef, model.toJson())
             resolve(model)
           } else if(this.batch){
             const docRef = this.db.collection(blueprint.buildCollectionRoute()).doc()
-            this.batch.set(docRef, model.toJson())
             model.id = docRef.id
+            this.batch.set(docRef, model.toJson())
             resolve(model)
           } else {
             this.db.collection(blueprint.buildCollectionRoute())

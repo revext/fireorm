@@ -46,13 +46,13 @@ export default class ClientEngine implements EngineInterface {
         } else {
           if(this.transaction){
             const docRef = doc(this.db, blueprint.buildCollectionRoute())
-            this.transaction.set(docRef, model.toJson())
             model.id = docRef.id
+            this.transaction.set(docRef, model.toJson())
             resolve(model)
           } else if(this.batch){
             const docRef = doc(this.db, blueprint.buildCollectionRoute())
-            this.batch.set(docRef, model.toJson())
             model.id = docRef.id
+            this.batch.set(docRef, model.toJson())
             resolve(model)
           } else {
             addDoc(collection(this.db, blueprint.buildCollectionRoute())
