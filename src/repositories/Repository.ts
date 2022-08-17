@@ -55,7 +55,7 @@ export default abstract class Repository<T extends Model> {
   async saveMany (models: T[]): Promise<T[]> {
     try {
       await Promise.all(models.map(model => model.validate()))
-      return this.engine.saveMany(models)
+      return await this.engine.saveMany(models)
     } catch(error){
       throw error
     }
@@ -64,7 +64,7 @@ export default abstract class Repository<T extends Model> {
   async save (model: T): Promise<T> {
     try {
       await model.validate()
-      return this.engine.save(model)
+      return await this.engine.save(model)
     } catch(error){
       throw error
     }

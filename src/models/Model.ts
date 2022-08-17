@@ -66,14 +66,14 @@ export default abstract class Model {
         if (validator.hasAsync) {
           validator.checkAsync(resolve, () => {
             this.errors = validator.errors
-            reject()
+            reject(this.errors)
           })
         } else {
           if (validator.check()) {
             resolve()
           } else {
             this.errors = validator.errors
-            reject()
+            reject(this.errors)
           }
         }
       })
