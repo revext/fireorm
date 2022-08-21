@@ -181,7 +181,7 @@ export default class ClientEngine implements EngineInterface {
       throw new Error('Cannot queryAsGroup in batch or transaction')
     }
 
-    const collectionRef = collectionGroup(this.db, blueprint.buildCollectionRoute()).withConverter(this.getConverter<T>(blueprint.constructorFunction))
+    const collectionRef = collectionGroup(this.db, blueprint.getSubCollectionName()).withConverter(this.getConverter<T>(blueprint.constructorFunction))
 
     const wheres: any[] = []
     queryParams.forEach(param => {
