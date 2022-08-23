@@ -51,10 +51,10 @@ export default class ServerEngine implements EngineInterface {
             this.batch.set(docRef, model.toJson())
             resolve(model)
           } else {
-            this.db.collection(blueprint.buildCollectionRoute())
-              .withConverter(this.getConverter<T>(blueprint.constructorFunction))
-              .add(model).then(response => {
-                model.id = response.id
+            let docRef = this.db.collection(blueprint.buildCollectionRoute())
+              .withConverter(this.getConverter<T>(blueprint.constructorFunction)).doc()
+            model.id = docRef.id
+            this.db.collection(blueprint.buildCollectionRoute()).doc(model.id).set(model).then(() => {
                 resolve(model)
               })
           }
