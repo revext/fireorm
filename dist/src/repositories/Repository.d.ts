@@ -22,9 +22,9 @@ export default abstract class Repository<T extends Model> {
     queryAsGroup(queryParams: QueryParam[]): Promise<T[]>;
     load(id: string, routeParams?: any, forceRefresh?: boolean): Promise<T>;
     loadMany(ids: string[], routeParams?: any, forceRefresh?: boolean): Promise<T[]>;
-    snapshotListener(name: string, id: string, routeParams: any, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)): void;
-    snapshotListenerForModel(name: string, model: T, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)): void;
-    snapshotListenerMany(name: string, queryParams: QueryParam[], routeParams: any, onRecieve: ((entity: T[]) => void), onError: ((error: Error) => void)): void;
+    snapshotListener(name: string, id: string, routeParams: any, onRecieve: ((entity: T) => void), onError?: ((error: Error) => void)): void;
+    snapshotListenerForModel(name: string, model: T, onRecieve: ((entity: T) => void), onError?: ((error: Error) => void)): void;
+    snapshotListenerMany(name: string, queryParams: QueryParam[], routeParams: any, onRecieve: ((entity: T[]) => void), onError?: ((error: Error) => void)): void;
     unsubscribe(name: string): void;
     hasListener(name: string): boolean;
     delete(id: string, routeParams?: any): Promise<void>;

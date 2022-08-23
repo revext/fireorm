@@ -139,15 +139,15 @@ export default abstract class Repository<T extends Model> {
     return returnArray
   }
 
-  snapshotListener(name: string, id: string, routeParams: any = {}, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)) {
+  snapshotListener(name: string, id: string, routeParams: any = {}, onRecieve: ((entity: T) => void), onError: ((error: Error) => void) = null) {
     this.engine.snapshotListener(name, this.getModelsBlueprint(routeParams), id, onRecieve, onError)
   }
 
-  snapshotListenerForModel(name: string, model: T, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)) {
+  snapshotListenerForModel(name: string, model: T, onRecieve: ((entity: T) => void), onError: ((error: Error) => void) = null) {
     this.engine.snapshotListener(name, model.getBlueprint(), model.id, onRecieve, onError)
   }
 
-  snapshotListenerMany(name: string, queryParams: QueryParam[], routeParams: any = {}, onRecieve: ((entity: T[]) => void), onError: ((error: Error) => void)) {
+  snapshotListenerMany(name: string, queryParams: QueryParam[], routeParams: any = {}, onRecieve: ((entity: T[]) => void), onError: ((error: Error) => void) = null) {
     this.engine.snapshotListenerMany(name, this.getModelsBlueprint(routeParams), queryParams, onRecieve, onError)
   }
 
