@@ -28,8 +28,8 @@ export default interface EngineInterface {
     //queries the database on all the subcollections with the same name as the blueprint
     queryAsGroup<T extends Model>(blueprint: Blueprint<T>, queryParams: QueryParam[]): Promise<T[]>
 
-    snapshotListener<T extends Model>(name: string, blueprint: Blueprint<T>, id: string, onRecieve: ((entity: T) => void)): void
-    snapshotListenerMany<T extends Model>(name: string, blueprint: Blueprint<T>, queryParams: QueryParam[], onRecieve: ((entities: T[]) => void)): void
+    snapshotListener<T extends Model>(name: string, blueprint: Blueprint<T>, id: string, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)): void
+    snapshotListenerMany<T extends Model>(name: string, blueprint: Blueprint<T>, queryParams: QueryParam[], onRecieve: ((entities: T[]) => void), onError: ((error: Error) => void)): void
     unsubscribeListener(name: string): void 
     hasListener(name: string): boolean
 

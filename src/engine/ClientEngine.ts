@@ -191,14 +191,14 @@ export default class ClientEngine implements EngineInterface {
     return (await getDocs(query(collectionRef, ...wheres))).docs.map(d => d.data() as T)
   }
 
-  snapshotListener<T extends Model>(name: string, blueprint: Blueprint<T>, id: string, onRecieve: ((entity: T) => void)): void {
+  snapshotListener<T extends Model>(name: string, blueprint: Blueprint<T>, id: string, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)): void {
     this.listeners[name] = onSnapshot(doc(this.db, blueprint.buildCollectionRoute(), id).withConverter(this.getConverter<T>(blueprint.constructorFunction)), (snapshot) => {
       onRecieve(snapshot.data() as T)
-    })
+    }, (error) => onError(error))
   }
   
 
-  snapshotListenerMany<T extends Model>(name: string, blueprint: Blueprint<T>, queryParams: QueryParam[], onRecieve: ((entities: T[]) => void)): void {
+  snapshotListenerMany<T extends Model>(name: string, blueprint: Blueprint<T>, queryParams: QueryParam[], onRecieve: ((entities: T[]) => void), onError: ((error: Error) => void)): void {
     const collectionRef = collection(this.db, blueprint.buildCollectionRoute()).withConverter(this.getConverter<T>(blueprint.constructorFunction))
     const wheres: any[] = []
     queryParams.forEach(param => {
@@ -207,7 +207,7 @@ export default class ClientEngine implements EngineInterface {
 
     this.listeners[name] = onSnapshot(query(collectionRef, ...wheres), (snapshot) => {
       onRecieve(snapshot.docs.map(d => d.data() as T))
-    })
+    }, (error) => onError(error))
   }
 
   unsubscribeListener(name: string): void {

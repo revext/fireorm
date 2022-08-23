@@ -24,8 +24,8 @@ export default class ClientEngine implements EngineInterface {
     loadCollection<T extends Model>(blueprint: Blueprint<T>): Promise<T[]>;
     query<T extends Model>(blueprint: Blueprint<T>, queryParams: QueryParam[]): Promise<T[]>;
     queryAsGroup<T extends Model>(blueprint: Blueprint<T>, queryParams: QueryParam[]): Promise<T[]>;
-    snapshotListener<T extends Model>(name: string, blueprint: Blueprint<T>, id: string, onRecieve: ((entity: T) => void)): void;
-    snapshotListenerMany<T extends Model>(name: string, blueprint: Blueprint<T>, queryParams: QueryParam[], onRecieve: ((entities: T[]) => void)): void;
+    snapshotListener<T extends Model>(name: string, blueprint: Blueprint<T>, id: string, onRecieve: ((entity: T) => void), onError: ((error: Error) => void)): void;
+    snapshotListenerMany<T extends Model>(name: string, blueprint: Blueprint<T>, queryParams: QueryParam[], onRecieve: ((entities: T[]) => void), onError: ((error: Error) => void)): void;
     unsubscribeListener(name: string): void;
     hasListener(name: string): boolean;
     delete<T extends Model>(blueprint: Blueprint<T>, id: string): Promise<void>;
