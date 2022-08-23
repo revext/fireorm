@@ -55,7 +55,7 @@ export default class ClientEngine implements EngineInterface {
             this.batch.set(docRef, model.toJson())
             resolve(model)
           } else {
-            let docRef = doc(this.db, blueprint.buildCollectionRoute())
+            let docRef = doc(collection(this.db, blueprint.buildCollectionRoute()))
               .withConverter(this.getConverter<T>(blueprint.constructorFunction))
             model.id = docRef.id
             setDoc(docRef, model).then(() => {
