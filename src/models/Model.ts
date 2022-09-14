@@ -332,10 +332,10 @@ export default abstract class Model {
             if(Array.isArray(data[jsonPropertyKey])){
               anyThis[jsonPropertyKey] = new Array()
               data[jsonPropertyKey].forEach((value: any) => {
-                anyThis[jsonPropertyKey].push(this.convertToInstance(options.modelClass, value, fromFireJson))
+                anyThis[jsonPropertyKey].push(this.convertToInstance(relationOption?.modelClass ?? options.modelClass, value, fromFireJson))
               })
             } else {
-              anyThis[jsonPropertyKey] = this.convertToInstance(options.modelClass, data[jsonPropertyKey], fromFireJson)
+              anyThis[jsonPropertyKey] = this.convertToInstance(relationOption?.modelClass ?? options.modelClass, data[jsonPropertyKey], fromFireJson)
             }
           } else {
             if(options?.timestamp) {
