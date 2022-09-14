@@ -260,8 +260,8 @@ export default abstract class Model {
     private innerToJson(toFireJson: boolean): any {
       const json: any = {}
 
-      const relationData = (Object.getPrototypeOf(this) as ClassWithRelations).relations
-      const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
+      const relationData = (Object.getPrototypeOf(this) as ClassWithRelations).relations ?? {}
+      const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields ?? {}
       const fieldKeys = Object.keys(fieldData)
 
       for(const propertyKey in this) {
@@ -319,8 +319,8 @@ export default abstract class Model {
     private innerFromJson(data: any, fromFireJson: boolean): this {
       let anyThis = this as any
 
-      const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
-      const relationData = (Object.getPrototypeOf(this) as ClassWithRelations).relations
+      const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields ?? {}
+      const relationData = (Object.getPrototypeOf(this) as ClassWithRelations).relations ?? {}
 
       for(const propertyKey in data) {
         const options = fieldData[propertyKey] as FieldConfig ?? null
