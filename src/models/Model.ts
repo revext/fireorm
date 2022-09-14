@@ -252,9 +252,12 @@ export default abstract class Model {
     }
 
     toJson(toFireJson: boolean = false): any {
-      this.reset()
+      // this.reset()
 
-      return this.innerToJson(toFireJson)
+      const json = this.innerToJson(toFireJson)
+
+      // this.init()
+      return json
     }
 
     private innerToJson(toFireJson: boolean): any {
@@ -269,7 +272,7 @@ export default abstract class Model {
         if(fieldKeys.includes(propertyKey) || !toFireJson){
           const options = fieldData[propertyKey] as FieldConfig ?? null
           const relationOption = relationData[propertyKey] as RelationConfig ?? null
-          const jsonPropertyKey = options.name ?? propertyKey
+          const jsonPropertyKey = options?.name ?? propertyKey
           if(this[propertyKey] !== undefined){
             if(options?.modelClass || (relationOption?.modelClass && !toFireJson)) {
               if(Array.isArray(this[propertyKey])){
@@ -303,7 +306,7 @@ export default abstract class Model {
 
     private convertFromInstance(data: any, toFireJson: boolean): any {
       if(data instanceof Model){
-        return data.innerFromJson(data, toFireJson)
+        return data.innerToJson(toFireJson)
       } else {
         return instanceToPlain(data, {enableCircularCheck: true})
       }
