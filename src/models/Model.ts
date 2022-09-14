@@ -271,7 +271,7 @@ export default abstract class Model {
           const relationOption = relationData[propertyKey] as RelationConfig ?? null
           const jsonPropertyKey = options.name ?? propertyKey
           if(this[propertyKey] !== undefined){
-            if(options?.modelClass || relationOption?.modelClass) {
+            if(options?.modelClass || (relationOption?.modelClass && !toFireJson)) {
               if(Array.isArray(this[propertyKey])){
                 json[jsonPropertyKey] = []
                 ;(this[propertyKey] as unknown as Array<any>).forEach((value: any) => {
@@ -328,7 +328,7 @@ export default abstract class Model {
         
         const jsonPropertyKey = options?.name ?? propertyKey
         if(data[jsonPropertyKey]){
-          if(options?.modelClass || relationOption?.modelClass) {
+          if(options?.modelClass || (relationOption?.modelClass && !fromFireJson)) {
             if(Array.isArray(data[jsonPropertyKey])){
               anyThis[jsonPropertyKey] = new Array()
               data[jsonPropertyKey].forEach((value: any) => {
