@@ -28,10 +28,10 @@ export default class ClientEngine implements EngineInterface {
         // if model has id, then update firestore document otherwise add firestore document to collection
         if (model.id) {
           if(this.transaction){
-            this.transaction.set(doc(this.db, blueprint.buildCollectionRoute(), model.id), model.toJson())
+            this.transaction.set(doc(this.db, blueprint.buildCollectionRoute(), model.id), model.toJson(true))
             resolve(model)
           } else if(this.batch){
-            this.batch.set(doc(this.db, blueprint.buildCollectionRoute(), model.id), model.toJson())
+            this.batch.set(doc(this.db, blueprint.buildCollectionRoute(), model.id), model.toJson(true))
             resolve(model)
           } else {
 
@@ -47,12 +47,12 @@ export default class ClientEngine implements EngineInterface {
           if(this.transaction){
             const docRef = doc(this.db, blueprint.buildCollectionRoute())
             model.id = docRef.id
-            this.transaction.set(docRef, model.toJson())
+            this.transaction.set(docRef, model.toJson(true))
             resolve(model)
           } else if(this.batch){
             const docRef = doc(this.db, blueprint.buildCollectionRoute())
             model.id = docRef.id
-            this.batch.set(docRef, model.toJson())
+            this.batch.set(docRef, model.toJson(true))
             resolve(model)
           } else {
             let docRef = doc(collection(this.db, blueprint.buildCollectionRoute()))
@@ -266,14 +266,14 @@ export default class ClientEngine implements EngineInterface {
   getConverter<T extends Model>(constructor: ConstructorFunction<T>) {
     return {
       toFirestore (item: T): DocumentData {
-        return item.toJson()
+        return item.toJson(true)
       },
       fromFirestore (
         snapshot: QueryDocumentSnapshot<T>,
       ): T {
         const data = snapshot.data()
         data.id = snapshot.id
-        return (new constructor()).fromJson(data)
+        return (new constructor()).fromJson(data, true)
       }
     }
   }

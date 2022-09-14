@@ -8,6 +8,7 @@ export default abstract class Model {
     relationsLoaded: string[];
     constructor(..._: any[]);
     init(..._: any[]): void;
+    reset(): void;
     private errors;
     abstract getModelName(): string;
     private collectRules;
@@ -21,8 +22,10 @@ export default abstract class Model {
     getBlueprint<T extends Model>(this: T): Blueprint<T>;
     getRoute(): string;
     getRouteParameterMapping(): ParamsObject;
-    toJson(): any;
-    private convertToJson;
-    fromJson(data: any): this;
-    private convertFromJson;
+    toJson(toFireJson?: boolean): any;
+    private innerToJson;
+    private convertFromInstance;
+    fromJson(data: any, fromFireJson?: boolean): this;
+    private innerFromJson;
+    private convertToInstance;
 }

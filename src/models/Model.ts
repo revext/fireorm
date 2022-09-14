@@ -29,6 +29,7 @@ export default abstract class Model {
     constructor(..._: any[]) {}
 
     init(..._: any[]): void { return }
+    reset(): void { return }
 
     private errors: Errors = null
 
@@ -250,7 +251,13 @@ export default abstract class Model {
 
     }
 
-    toJson(): any {
+    toJson(toFireJson: boolean = false): any {
+      this.reset()
+
+      return this.innerToJson(toFireJson)
+    }
+
+    private innerToJson(toFireJson: boolean): any {
       const json: any = {}
 
       const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
@@ -258,29 +265,30 @@ export default abstract class Model {
 
       for(const propertyKey in this) {
         // if property has field metadata, then we must convert into json
-        if(fieldKeys.includes(propertyKey)){
-          const options = fieldData[propertyKey] as FieldConfig
+        if(fieldKeys.includes(propertyKey) || !toFireJson){
+          const options = fieldData[propertyKey] as FieldConfig ?? null
           const jsonPropertyKey = options.name ?? propertyKey
           if(this[propertyKey] !== undefined){
-            if(this[propertyKey] instanceof Model) {
-              // if the property is a model, then we must convert into json
-              json[jsonPropertyKey] = (this[propertyKey] as unknown as Model).toJson()
-            } else {
-              //if property is an array or object then iterate over its properties, and convert into json recursively
-              if(Array.isArray(this[propertyKey])) {
-                json[jsonPropertyKey] = this.convertToJson(this[propertyKey])
-              } else if(this[propertyKey] instanceof Object) {
-                json[jsonPropertyKey] = instanceToPlain(this[propertyKey], {enableCircularCheck: true})
-                // json[jsonPropertyKey] = this[propertyKey]
+            if(options?.modelClass) {
+              if(Array.isArray(this[propertyKey])){
+                json[jsonPropertyKey] = []
+                ;(this[propertyKey] as unknown as Array<any>).forEach((value: any) => {
+                  json[jsonPropertyKey].push(this.convertFromInstance(value, toFireJson))
+                })
               } else {
-                //otherwise property is just a property, so we convert it based on its type or decorator
-                if(options.timestamp) {
+                json[jsonPropertyKey] = this.convertFromInstance(this[propertyKey], toFireJson)
+              }
+              // if the property is a model, then we must convert into json
+            } else {
+              if(options?.timestamp) {
+                if(toFireJson){
                   json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
                 } else {
                   json[jsonPropertyKey] = this[propertyKey]
                 }
+              } else {
+                json[jsonPropertyKey] = this[propertyKey]
               }
-
             }
           } else {
             json[jsonPropertyKey] = null
@@ -291,88 +299,62 @@ export default abstract class Model {
       return json
     }
 
-    private convertToJson(root: Array<any>|Object): any {
-      const json: any = Array.isArray(root) ? [] : {}
-      
-      Object.keys(root).forEach((key) => {
-        if((root as any)[key] !== undefined)
-          if((root as any)[key] instanceof Model) {
-            json[key] = (root as any)[key].toJson() 
-          } else {
-            if(Array.isArray((root as any)[key]) || (root as any)[key] instanceof Object){
-              json[key] = this.convertToJson((root as any)[key])
-            } else { 
-              json[key] = (root as any)[key]
-            }
-          }
-      })
-
-      return json
+    private convertFromInstance(data: any, toFireJson: boolean): any {
+      if(data instanceof Model){
+        return data.innerFromJson(data, toFireJson)
+      } else {
+        return instanceToPlain(data, {enableCircularCheck: true})
+      }
     }
 
-    fromJson(data: any): this {
+    fromJson(data: any, fromFireJson: boolean = false): this {
+      this.innerFromJson(data, fromFireJson)
+
+      this.init()
+      return this
+    }
+
+    private innerFromJson(data: any, fromFireJson: boolean): this {
       let anyThis = this as any
 
       const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
-      const fieldKeys = Object.keys(fieldData)
 
       for(const propertyKey in data) {
-        //if property exists in data and property has field metadata, then we must convert from json
-        if(fieldKeys.includes(propertyKey)){
-          const options = fieldData[propertyKey] as FieldConfig
-          const jsonPropertyKey = options.name ?? propertyKey
-          if(data[jsonPropertyKey]){
-            if(options?.modelClass) {
-              if(Array.isArray(data[jsonPropertyKey])){
-                anyThis[jsonPropertyKey] = new Array()
-                data[jsonPropertyKey].forEach((value: any) => {
-                  if(options.modelClass.prototype instanceof Model){
-                    anyThis[jsonPropertyKey].push(((new options.modelClass()) as Model).fromJson(value))
-                  } else {
-                    anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, value, {enableCircularCheck: true})
-                  }
-                })
-              } else {
-                if(options.modelClass.prototype instanceof Model){
-                  anyThis[jsonPropertyKey].push(((new options.modelClass()) as Model).fromJson(data[jsonPropertyKey]))
-                } else {
-                  anyThis[jsonPropertyKey] = plainToInstance(options.modelClass, data[jsonPropertyKey], {enableCircularCheck: true})
-                }
-              }
+        const options = fieldData[propertyKey] as FieldConfig ?? null
+        const jsonPropertyKey = options?.name ?? propertyKey
+        if(data[jsonPropertyKey]){
+          if(options?.modelClass) {
+            if(Array.isArray(data[jsonPropertyKey])){
+              anyThis[jsonPropertyKey] = new Array()
+              data[jsonPropertyKey].forEach((value: any) => {
+                anyThis[jsonPropertyKey].push(this.convertToInstance(options.modelClass, value, fromFireJson))
+              })
             } else {
-              if(options.timestamp) {
+              anyThis[jsonPropertyKey] = this.convertToInstance(options.modelClass, data[jsonPropertyKey], fromFireJson)
+            }
+          } else {
+            if(options?.timestamp) {
+              if(fromFireJson){
                 anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
               } else {
-                //if property is an array or object then iterate over its properties, and convert from json recursively
-                if(Array.isArray(data[jsonPropertyKey])){
-                  anyThis[propertyKey] = this.convertFromJson(data[jsonPropertyKey])
-                } else if(data[jsonPropertyKey] instanceof Object) {
-                  //if property is object then we assign the data to the default property value, user might need it
-                  anyThis[propertyKey] = this.convertFromJson(Object.assign(anyThis[propertyKey], data[jsonPropertyKey]))
-                } else {
-                  //otherwise property is just a property, so we convert it based on its type or decorator
-                  anyThis[propertyKey] = data[jsonPropertyKey]
-                 
-                }
+                anyThis[propertyKey] = data[jsonPropertyKey]
               }
+            } else {
+              anyThis[propertyKey] = data[jsonPropertyKey]
             }
           }
         }
       }
       this.id = data.id
+
       return this
     }
 
-    private convertFromJson(root: Array<any>|Object): any{
-      const json: any = Array.isArray(root) ? [] : {}
-      
-      Object.keys(root).forEach((key) => {
-        if(Array.isArray((root as any)[key]) || (root as any)[key] instanceof Object)
-          (json as any)[key] = this.convertFromJson((root as any)[key])
-        else
-          (json as any)[key] = (root as any)[key]
-      })
-
-      return json
+    private convertToInstance<T extends ConstructorFunction<unknown>>(modelClass: T, data: any, fromFireJson: boolean): T {
+      if(modelClass.prototype instanceof Model){
+        return ((new modelClass()) as Model).innerFromJson(data, fromFireJson) as unknown as T
+      } else {
+        return plainToInstance(modelClass, data, {enableCircularCheck: true}) as T
+      }
     }
 }

@@ -27,10 +27,10 @@ export default class ServerEngine implements EngineInterface {
         // if model has id, then update firestore document otherwise add firestore document to collection
         if (model.id) {
           if(this.transaction){
-            this.transaction.set(this.db.collection(blueprint.buildCollectionRoute()).doc(model.id), model.toJson())
+            this.transaction.set(this.db.collection(blueprint.buildCollectionRoute()).doc(model.id), model.toJson(true))
             resolve(model)
           } else if(this.batch){
-            this.batch.set(this.db.collection(blueprint.buildCollectionRoute()).doc(model.id), model.toJson())
+            this.batch.set(this.db.collection(blueprint.buildCollectionRoute()).doc(model.id), model.toJson(true))
             resolve(model)
           } else {
             this.db.collection(blueprint.buildCollectionRoute())
@@ -43,12 +43,12 @@ export default class ServerEngine implements EngineInterface {
           if(this.transaction){
             const docRef = this.db.collection(blueprint.buildCollectionRoute()).doc()
             model.id = docRef.id
-            this.transaction.set(docRef, model.toJson())
+            this.transaction.set(docRef, model.toJson(true))
             resolve(model)
           } else if(this.batch){
             const docRef = this.db.collection(blueprint.buildCollectionRoute()).doc()
             model.id = docRef.id
-            this.batch.set(docRef, model.toJson())
+            this.batch.set(docRef, model.toJson(true))
             resolve(model)
           } else {
             let docRef = this.db.collection(blueprint.buildCollectionRoute())
@@ -256,14 +256,14 @@ export default class ServerEngine implements EngineInterface {
   getConverter<T extends Model>(constructor: ConstructorFunction<T>) {
     return {
       toFirestore (item: T): admin.firestore.DocumentData {
-        return item.toJson()
+        return item.toJson(true)
       },
       fromFirestore (
         snapshot: admin.firestore.QueryDocumentSnapshot,
       ): T {
         const data = snapshot.data()
         data.id = snapshot.id
-        return (new constructor()).fromJson(data)
+        return (new constructor()).fromJson(data, true)
       }
     }
   }
