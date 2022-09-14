@@ -3,7 +3,7 @@ import Validator, { Errors } from "validatorjs"
 import Repository from "~/repositories/Repository";
 import { useEngine } from "../engine";
 import { getRepositoryFor } from "../repositories";
-import { HasManyRelationConfig, HasOneRelationConfig, RelationConfigWithType } from "../types/configs/RelationConfig";
+import { HasManyRelationConfig, HasOneRelationConfig, RelationConfig, RelationConfigWithType } from "../types/configs/RelationConfig";
 import { ConstructorFunction } from "../types/functions/ConstructorFunction";
 import { FieldConfig } from "../types/configs/FieldConfig";
 import { ValidateConfig } from "../types/configs/ValidateConfig";
@@ -260,6 +260,7 @@ export default abstract class Model {
     private innerToJson(toFireJson: boolean): any {
       const json: any = {}
 
+      const relationData = (Object.getPrototypeOf(this) as ClassWithRelations).relations
       const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
       const fieldKeys = Object.keys(fieldData)
 
@@ -267,9 +268,10 @@ export default abstract class Model {
         // if property has field metadata, then we must convert into json
         if(fieldKeys.includes(propertyKey) || !toFireJson){
           const options = fieldData[propertyKey] as FieldConfig ?? null
+          const relationOption = relationData[propertyKey] as RelationConfig ?? null
           const jsonPropertyKey = options.name ?? propertyKey
           if(this[propertyKey] !== undefined){
-            if(options?.modelClass) {
+            if(options?.modelClass || relationOption?.modelClass) {
               if(Array.isArray(this[propertyKey])){
                 json[jsonPropertyKey] = []
                 ;(this[propertyKey] as unknown as Array<any>).forEach((value: any) => {
@@ -318,12 +320,15 @@ export default abstract class Model {
       let anyThis = this as any
 
       const fieldData = (Object.getPrototypeOf(this) as ClassWithFields).fields
+      const relationData = (Object.getPrototypeOf(this) as ClassWithRelations).relations
 
       for(const propertyKey in data) {
         const options = fieldData[propertyKey] as FieldConfig ?? null
+        const relationOption = relationData[propertyKey] as RelationConfig ?? null
+        
         const jsonPropertyKey = options?.name ?? propertyKey
         if(data[jsonPropertyKey]){
-          if(options?.modelClass) {
+          if(options?.modelClass || relationOption?.modelClass) {
             if(Array.isArray(data[jsonPropertyKey])){
               anyThis[jsonPropertyKey] = new Array()
               data[jsonPropertyKey].forEach((value: any) => {
