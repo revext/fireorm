@@ -289,7 +289,7 @@ export default abstract class Model {
                 if(toFireJson){
                   json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
                 } else {
-                  json[jsonPropertyKey] = this[propertyKey]
+                  json[jsonPropertyKey] = (this[propertyKey] as Date).toString()
                 }
               } else {
                 json[jsonPropertyKey] = this[propertyKey]
@@ -345,7 +345,7 @@ export default abstract class Model {
               if(fromFireJson){
                 anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
               } else {
-                anyThis[propertyKey] = data[jsonPropertyKey]
+                anyThis[propertyKey] = new Date(data[jsonPropertyKey])
               }
             } else {
               anyThis[propertyKey] = data[jsonPropertyKey]
