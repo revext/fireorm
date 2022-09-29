@@ -269,33 +269,35 @@ export default class ServerEngine implements EngineInterface {
   }
 
   async runTransaction(operations: (() => Promise<void>)): Promise<any> {
-    return this.db.runTransaction(async transaction => {
-      this.transaction = transaction
-      // this.transaction.
-      return operations()
-    }).then((result) => {
-      this.transaction = null
-      return result
-    }).catch(e => {
-      this.transaction = null
-      throw e
+    return new Promise((resolve, reject) => {
+      this.db.runTransaction(async transaction => {
+        this.transaction = transaction
+        // this.transaction.
+        return operations()
+      }).then((result) => {
+        this.transaction = null
+        resolve(result)
+      }).catch(e => {
+        this.transaction = null
+        reject(e)
+      })
     })
+    
   }
 
   //TODO over 500 operations per transaction check
   async runBatch(operations: (() => Promise<void>)): Promise<any> {
-    this.batch = this.db.batch()
-
-    const result = await operations()
-
-    return await this.batch.commit().then(() => {
-      this.batch = null
-
-      return result
-    }).catch(e => {
-      this.batch = null
-
-      throw e
+    return new Promise((resolve, reject) => {
+      this.batch = this.db.batch()
+      operations().then(() => {
+        return this.batch.commit()
+      }).then((result) => {
+        this.batch = null
+        resolve(result)
+      }).catch(e => {
+        this.batch = null
+        reject(e)
+      })
     })
   }
 

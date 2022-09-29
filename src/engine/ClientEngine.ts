@@ -279,33 +279,34 @@ export default class ClientEngine implements EngineInterface {
   }
 
   async runTransaction(operations: (() => Promise<void>)): Promise<any> {
-    return runTransaction(this.db, async transaction => {
-      this.transaction = transaction
-      // this.transaction.
-      return operations()
-    }).then((result) => {
-      this.transaction = null
-      return result
-    }).catch(e => {
-      this.transaction = null
-      throw e
+    return new Promise((resolve, reject) => {
+      runTransaction(this.db, async transaction => {
+        this.transaction = transaction
+        // this.transaction.
+        return operations()
+      }).then((result) => {
+        this.transaction = null
+        resolve(result)
+      }).catch(e => {
+        this.transaction = null
+        reject(e)
+      })
     })
   }
 
   //TODO over 500 operations per transaction check
   async runBatch(operations: (() => Promise<void>)): Promise<any> {
-    this.batch = writeBatch(this.db)
-
-    const result = await operations()
-
-    return await this.batch.commit().then(() => {
-      this.batch = null
-
-      return result
-    }).catch(e => {
-      this.batch = null
-
-      throw e
+    return new Promise((resolve, reject) => {
+      this.batch = writeBatch(this.db)
+      operations().then(() => {
+        return this.batch.commit()
+      }).then((result) => {
+        this.batch = null
+        resolve(result)
+      }).catch(e => {
+        this.batch = null
+        reject(e)
+      })
     })
   }
 
