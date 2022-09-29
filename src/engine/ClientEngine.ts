@@ -73,7 +73,7 @@ export default class ClientEngine implements EngineInterface {
     return (new Promise((resolve, reject) => {
       try {
         const promises = models.map(model => this.save(model))
-        Promise.all(promises).then(resolve)
+        Promise.all(promises).then(resolve).catch(e => reject(e))
       } catch(e) {
         reject(e)
       }
@@ -108,7 +108,7 @@ export default class ClientEngine implements EngineInterface {
     return (new Promise((resolve, reject) => {
       try {
         const promises = ids.map(id => this.update(blueprint, id, data))
-        Promise.all(promises).then(() => resolve())
+        Promise.all(promises).then(() => resolve()).catch(e => reject(e))
       } catch(e) {
         reject(e)
       }
@@ -243,7 +243,7 @@ export default class ClientEngine implements EngineInterface {
     return (new Promise((resolve, reject) => {
       try {
         const promises = ids.map(id => this.delete(blueprint, id))
-        Promise.all(promises).then(() => resolve())
+        Promise.all(promises).then(() => resolve()).catch(e => reject(e))
       } catch(e) {
         reject(e)
       }
@@ -282,7 +282,7 @@ export default class ClientEngine implements EngineInterface {
     return runTransaction(this.db, async transaction => {
       this.transaction = transaction
       // this.transaction.
-      return await operations()
+      return operations()
     }).then((result) => {
       this.transaction = null
       return result

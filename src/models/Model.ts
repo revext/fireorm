@@ -289,7 +289,7 @@ export default abstract class Model {
                 if(toFireJson){
                   json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
                 } else {
-                  json[jsonPropertyKey] = (this[propertyKey] as Date).toString()
+                  json[jsonPropertyKey] = (this[propertyKey] as unknown as Date).toString()
                 }
               } else {
                 json[jsonPropertyKey] = this[propertyKey]

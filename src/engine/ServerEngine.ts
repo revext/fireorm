@@ -69,7 +69,7 @@ export default class ServerEngine implements EngineInterface {
     return (new Promise((resolve, reject) => {
       try {
         const promises = models.map(model => this.save(model))
-        Promise.all(promises).then(resolve)
+        Promise.all(promises).then(resolve).catch(e => reject(e))
       } catch(e) {
         reject(e)
       }
@@ -102,7 +102,7 @@ export default class ServerEngine implements EngineInterface {
     return (new Promise((resolve, reject) => {
       try {
         const promises = ids.map(id => this.update(blueprint, id, data))
-        Promise.all(promises).then(() => resolve())
+        Promise.all(promises).then(() => resolve()).catch(e => reject(e))
       } catch(e) {
         reject(e)
       }
@@ -237,7 +237,7 @@ export default class ServerEngine implements EngineInterface {
     return (new Promise((resolve, reject) => {
       try {
         const promises = ids.map(id => this.delete(blueprint, id))
-        Promise.all(promises).then(() => resolve())
+        Promise.all(promises).then(() => resolve()).catch(e => reject(e))
       } catch(e) {
         reject(e)
       }
@@ -271,7 +271,8 @@ export default class ServerEngine implements EngineInterface {
   async runTransaction(operations: (() => Promise<void>)): Promise<any> {
     return this.db.runTransaction(async transaction => {
       this.transaction = transaction
-      return await operations()
+      // this.transaction.
+      return operations()
     }).then((result) => {
       this.transaction = null
       return result
