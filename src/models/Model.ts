@@ -120,7 +120,7 @@ export default abstract class Model {
       if(!this.relationsLoaded.includes(relationName) || forceReload){
         const routeParams = this.getRouteParameterMapping()
         for(const propertyKey in this) {
-          if(relationKeys.includes(propertyKey)){
+          if(relationKeys.includes(propertyKey) && propertyKey === relationName){
             const options = relationData[propertyKey]
             //get the repository for the current modelClass
             const repository = getRepositoryFor(options.modelClass as ConstructorFunction<Model>) as Repository<Model>
@@ -286,10 +286,14 @@ export default abstract class Model {
               // if the property is a model, then we must convert into json
             } else {
               if(options?.timestamp) {
-                if(toFireJson){
-                  json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
+                if(this[propertyKey] instanceof Date){
+                  if(toFireJson){
+                    json[jsonPropertyKey] = useEngine().convertToTimestamp((this[propertyKey] as any))
+                  } else {
+                    json[jsonPropertyKey] = (this[propertyKey] as unknown as Date).toString()
+                  }
                 } else {
-                  json[jsonPropertyKey] = (this[propertyKey] as unknown as Date).toString()
+                  json[jsonPropertyKey] = null
                 }
               } else {
                 json[jsonPropertyKey] = this[propertyKey]
@@ -342,10 +346,14 @@ export default abstract class Model {
             }
           } else {
             if(options?.timestamp) {
-              if(fromFireJson){
-                anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
+              if(data[jsonPropertyKey] !== null){
+                if(fromFireJson){
+                  anyThis[propertyKey] = useEngine().convertFromTimestamp(data[jsonPropertyKey])
+                } else {
+                  anyThis[propertyKey] = new Date(data[jsonPropertyKey])
+                }
               } else {
-                anyThis[propertyKey] = new Date(data[jsonPropertyKey])
+                anyThis[propertyKey] = null
               }
             } else {
               anyThis[propertyKey] = data[jsonPropertyKey]
