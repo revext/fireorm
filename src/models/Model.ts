@@ -35,6 +35,19 @@ export default abstract class Model {
 
     abstract getModelName(): string
 
+    autoId(): string {
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+      let autoId = ''
+
+      for (let i = 0; i < 20; i++) {
+        autoId += CHARS.charAt(
+          Math.floor(Math.random() * CHARS.length)
+        )
+      }
+      return autoId
+    }
+
     private collectRules<T>(): Validator.Rules {
       
       const prototype = (Object.getPrototypeOf(this) as ClassWithRules<T>)
@@ -252,11 +265,11 @@ export default abstract class Model {
     }
 
     toJson(toFireJson: boolean = false): any {
-      // this.reset()
+      this.reset()
 
       const json = this.innerToJson(toFireJson)
 
-      // this.init()
+      this.init()
       return json
     }
 

@@ -11,6 +11,7 @@ export default abstract class Model {
     reset(): void;
     private errors;
     abstract getModelName(): string;
+    autoId(): string;
     private collectRules;
     validate(): Promise<void>;
     hasErrors(): boolean;
